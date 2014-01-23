@@ -1,0 +1,366 @@
+<?php 
+
+/*PERMS*/
+function conabip_libros_perm() {
+  return array('participar en encuesta libros', 'ver resultados encuesta libros');
+} 
+
+/*MENU*/
+function conabip_libros_menu() {
+
+  $items = array();
+
+
+  $items['encuesta_libros'] = array(
+    'title' => 'ENCUESTA PARA SELECCIÓN DE MATERIAL BIBLIOGRÁFICO',
+    'description' => '',
+    'page callback' => 'conabip_libros_all',   
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('participar en encuesta libros'),
+   );
+   
+   $items['encuesta_libros/resultados'] = array(
+    'title' => 'Resultados Encuesta Libros',
+    'description' => '',
+    'page callback' => 'conabip_libros_results',   
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('ver resultados encuesta libros'),
+   );
+
+ 
+
+  return $items;
+}
+
+
+
+
+
+/*PAGINA ENCUESTA*/
+function conabip_libros_all(){
+	drupal_add_css('sites/all/modules/conabip_libros/conabip_libros.css');
+	//drupal_add_js('sites/all/modules/conabip_libros/conabip_libros.js');
+	
+	drupal_set_title("ENCUESTA PARA SELECCIÓN DE MATERIAL BIBLIOGRÁFICO");
+	
+	//Las preguntas y opciones
+	$encuestas = conabip_libros_preguntas();
+
+	global $user;
+	
+	//Verifica si ya participo de la encuesta
+	$queryParticipa = db_query('SELECT * FROM encuestaLibros WHERE uid = '.$user->uid);
+	if(db_affected_rows()>0){
+		return "Usted ya ha participado de la encuesta orientativa para la selección del material bibliográfico.";
+	}
+	
+	
+	
+	//Si mando los datos, los guardo en la DB
+	
+	if($_REQUEST['envioEncuesta']){
+
+		//Organizar datos
+		
+		//Guardar en DB
+		
+		foreach($encuestas as $encuesta){
+			$grupo++;
+			$optionNumber = 0;
+			foreach ($encuesta['options'] as $option){
+				$optionNumber++;
+				if($_REQUEST[$grupo.'_'.$optionNumber]){
+					db_query('INSERT INTO encuestaLibros(uid,grupo,rta) VALUES('.$user->uid.','.$grupo.',"'.$_REQUEST[$grupo.'_'.$optionNumber].'")');
+				}
+			}	
+		}
+		
+		
+		//Mensaje
+		return "Gracias. Usted a completado la encuesta orientativa para la selección del material bibliográfico.";
+				
+		
+	}
+	
+	
+	//Pagina Encuesta
+	
+	$totalGrupos = count($encuestas);
+	$salida.= '<p style="width:720px"> La compra centralizada es una de las líneas de acción de la CONABIP cuyo objetivo es proveer de material bibliográfico, audiovisual y multimedia a las bibliotecas populares. Se realiza mediante un programa anual y el material se distribuye por medio de envíos colectivos y las cajas para cada biblioteca contienen alrededor de 100 títulos, contribuyendo en forma creciente a incrementar su acervo bibliográfico.<br><br>
+
+La selección temática busca promover el pensamiento nacional y latinoamericano; el apoyo a planes, programas y proyectos; y la difusión y promoción de la literatura nacional y universal y la producción regional.
+<br><br>
+<b>CONSULTA A BIBLIOTECAS POPULARES</b>
+<br><br>
+Como parte del proceso de selección del material se desarrolla un mecanismo electrónico de consulta a las bibliotecas populares que permite tomar decisiones para la compra, valorando las necesidades y preferencias de las bibliotecas y sus usuarios. Este mecanismo de consulta tiene además el objeto de intensificar la comunicación, a través de una vía rápida y económica, como medio eficaz de participación de las BP en la toma de decisiones del organismo que las protege.
+<br><br>
+Para realizar la selección del material bibliográfico deberá elegir del listado siguiente los 70 libros (diez de cada grupo temático) que considere prioritarios para la biblioteca, de acuerdo con los pedidos de los usuarios y la orientación de la colección.
+<br><br>
+Si bien la consulta es orientativa, las tendencias mayoritarias ayudarán a la CONABIP a la hora de definir las adquisiciones de libros que se enviarán a las bibliotecas en el marco de la compra centralizada.</p>
+		<p class="decoBox"><b>IMPORTANTE:</b><br>
+Para realizar la encuesta tenga en cuenta que deberá elegir 10 títulos 
+por categoría temática. La misma cambiara de color cuando haya 
+completado las diez opciones pudiendo así pasar a la próxima. Una vez 
+completada las 10 categorías se habilitara la opción de envío de la encuesta.</p><br><br>
+	
+	
+	<form method="POST"><input name="envioEncuesta" type="hidden" value="'.time().'">';
+	foreach($encuestas as $encuesta){
+ 	$salida.= '<fieldset id="customPoll'.$encuesta['questionId'].'"><legend>'.$encuesta['question'].'</legend><div class="preguntasLibros">';
+	$i =0;
+  foreach ($encuesta['options'] as $option){
+    $i++;
+    $salida.= '<input type="checkbox" name="'.$encuesta['questionId'].'_'.$i.'" value="'.$option.'" /> '.$option.'<br />
+      ';
+    
+  }
+  
+
+		$salida.="</div><script>
+      $('#customPoll".$encuesta['questionId']." input').click(
+          function(){
+             
+           
+           if($('#customPoll".$encuesta['questionId']." input:checkbox:checked').size() == ".$encuesta['maxAllowed']."){
+            $('#customPoll".$encuesta['questionId']." input').attr('disabled',true);
+            $('#customPoll".$encuesta['questionId']." input:checkbox:checked').attr('disabled',false);
+            $('#customPoll".$encuesta['questionId']."').addClass('full');
+            
+            if($('fieldset.full').size() == ".$totalGrupos."){
+            	$('#encuestaSubmit').show();
+            	window.location='#enviarLNK';
+            }
+           
+            
+             
+           } 
+           if($('#customPoll".$encuesta['questionId']." input:checkbox:checked').size() < ".$encuesta['maxAllowed']."){
+            $('#customPoll".$encuesta['questionId']." input').attr('disabled',false);
+            $('#customPoll".$encuesta['questionId']."').removeClass('full');
+             
+           } 
+    });
+           
+                
+    </script>";
+	
+	$salida.='</fieldset><br/><br/>';
+	
+	
+	
+		
+}
+
+
+$salida.= '<a name="enviarLNK" id="enviarLNK">&nbsp;</a><input type="submit" id="encuestaSubmit" value="Enviar"></form><script>
+	$(document).ready(
+		function(){
+			$("#encuestaSubmit").hide();
+		}
+	);
+</script>';
+
+return $salida;
+}
+
+
+
+
+function conabip_libros_preguntas(){
+
+
+
+$queryLibros = db_query('SELECT * FROM encuestaLibrosLibros WHERE field2=1');
+$arrayLibros = array();
+while($resultados=db_fetch_array($queryLibros)){
+	$arrayLibros[] = $resultados['field3'].'. '.$resultados['field4'].', Editorial: '.$resultados['field5'].'.'; 
+}
+
+$encuestas[]= array(
+  'question'  => '1. Pensamiento Nacional y Latinoamericano.',
+  'questionId'  => 1,
+  'maxAllowed' => 10,
+  'options'   => $arrayLibros,  
+);
+
+
+
+
+$queryLibros = db_query('SELECT * FROM encuestaLibrosLibros WHERE field2=2');
+$arrayLibros = array();
+while($resultados=db_fetch_array($queryLibros)){
+	$arrayLibros[] = $resultados['field3'].'. '.$resultados['field4'].', Editorial: '.$resultados['field5'].'.'; 
+}
+
+$encuestas[]= array(
+  'question'  => '2. Economía: historia y temas de actualidad',
+  'questionId'  => 2,
+  'maxAllowed' => 10,
+  'options'   => $arrayLibros,  
+);
+
+
+
+$queryLibros = db_query('SELECT * FROM encuestaLibrosLibros WHERE field2=3');
+$arrayLibros = array();
+while($resultados=db_fetch_array($queryLibros)){
+	$arrayLibros[] = $resultados['field3'].'. '.$resultados['field4'].', Editorial: '.$resultados['field5'].'.'; 
+}
+
+$encuestas[]= array(
+  'question'  => '3. Literatura argentina.',
+  'questionId'  => 3,
+  'maxAllowed' => 10,
+  'options'   => $arrayLibros,  
+);
+
+
+
+$queryLibros = db_query('SELECT * FROM encuestaLibrosLibros WHERE field2=4');
+$arrayLibros = array();
+while($resultados=db_fetch_array($queryLibros)){
+	$arrayLibros[] = $resultados['field3'].'. '.$resultados['field4'].', Editorial: '.$resultados['field5'].'.'; 
+}
+
+$encuestas[]= array(
+  'question'  => '4. Literatura latinoamericana y universal. Grandes autores contemporáneos.',
+  'questionId'  => 4,
+  'maxAllowed' => 10,
+  'options'   => $arrayLibros,  
+);
+
+
+
+
+$queryLibros = db_query('SELECT * FROM encuestaLibrosLibros WHERE field2=5');
+$arrayLibros = array();
+while($resultados=db_fetch_array($queryLibros)){
+	$arrayLibros[] = $resultados['field3'].'. '.$resultados['field4'].', Editorial: '.$resultados['field5'].'.'; 
+}
+
+$encuestas[]= array(
+  'question'  => '5. Literatura infantil y juvenil.',
+  'questionId'  => 5,
+  'maxAllowed' => 10,
+  'options'   => $arrayLibros,  
+);
+
+
+
+$queryLibros = db_query('SELECT * FROM encuestaLibrosLibros WHERE field2=6');
+$arrayLibros = array();
+while($resultados=db_fetch_array($queryLibros)){
+	$arrayLibros[] = $resultados['field3'].'. '.$resultados['field4'].', Editorial: '.$resultados['field5'].'.'; 
+}
+
+$encuestas[]= array(
+  'question'  => '6. Producción regional: literatura, historia y sociedad',
+  'questionId'  => 6,
+  'maxAllowed' => 10,
+  'options'   => $arrayLibros,  
+);
+
+
+
+$queryLibros = db_query('SELECT * FROM encuestaLibrosLibros WHERE field2=7');
+$arrayLibros = array();
+while($resultados=db_fetch_array($queryLibros)){
+	$arrayLibros[] = $resultados['field3'].'. '.$resultados['field4'].', Editorial: '.$resultados['field5'].'.'; 
+}
+
+$encuestas[]= array(
+  'question'  => '7. Arte y Música orientación niños.',
+  'questionId'  => 7,
+  'maxAllowed' => 10,
+  'options'   => $arrayLibros,  
+);
+
+
+
+$queryLibros = db_query('SELECT * FROM encuestaLibrosLibros WHERE field2=8');
+$arrayLibros = array();
+while($resultados=db_fetch_array($queryLibros)){
+	$arrayLibros[] = $resultados['field3'].'. '.$resultados['field4'].', Editorial: '.$resultados['field5'].'.'; 
+}
+
+$encuestas[]= array(
+  'question'  => '8. Arte y Música orientación jóvenes.',
+  'questionId'  => 8,
+  'maxAllowed' => 10,
+  'options'   => $arrayLibros,  
+);
+
+
+
+$queryLibros = db_query('SELECT * FROM encuestaLibrosLibros WHERE field2=9');
+$arrayLibros = array();
+while($resultados=db_fetch_array($queryLibros)){
+	$arrayLibros[] = $resultados['field3'].'. '.$resultados['field4'].', Editorial: '.$resultados['field5'].'.'; 
+}
+
+$encuestas[]= array(
+  'question'  => '9. Herramientas para las Bibliotecas Populares: Bibliotecología, Referencia y Gestión de organizaciones sociales.',
+  'questionId'  => 9,
+  'maxAllowed' => 10,
+  'options'   => $arrayLibros,  
+);
+
+
+
+$queryLibros = db_query('SELECT * FROM encuestaLibrosLibros WHERE field2=10');
+$arrayLibros = array();
+while($resultados=db_fetch_array($queryLibros)){
+	$arrayLibros[] = $resultados['field3'].'. '.$resultados['field4'].', Editorial: '.$resultados['field5'].'.'; 
+}
+
+$encuestas[]= array(
+  'question'  => '10. Material Multimedia.',
+  'questionId'  => 10,
+  'maxAllowed' => 10,
+  'options'   => $arrayLibros,  
+);
+
+
+
+return $encuestas;
+}
+
+
+
+/*PAGINA DE RESULTADOS */
+
+function conabip_libros_results(){
+	$cantidadParticipantes = db_query('SELECT DISTINCT(uid) FROM encuestaLibros');
+	$cantidadParticipantes = db_affected_rows();
+	
+	$grupos = conabip_libros_preguntas();
+	foreach($grupos as $grupo){
+		$intGrupo++;
+		$salida.= '<fieldset><legend>'.$grupo['question'].'</legend>' ;
+		
+		
+		
+		$queryRtas = db_query('SELECT rta , COUNT(rta) as respuestas FROM encuestaLibros WHERE grupo = '.$intGrupo.' GROUP BY rta ORDER BY respuestas DESC LIMIT 20');
+		
+		
+		
+		
+		
+			$salida.='<table>
+			<tr><td style="width:70%"><b>Publicación</b></td><td style="text-align:center"><b>Votos</b></td></tr>';
+			while($queryObject= db_fetch_object($queryRtas)){
+			
+			$porcentaje = (($queryObject->respuestas)/$cantidadParticipantes)*100;
+			$porcentaje = number_format($porcentaje,2);
+				$salida.='<tr><td>'.$queryObject->rta.'</td><td style="text-align:center">'.$queryObject->respuestas.' <span>('.$porcentaje.' %)</span></td></tr>';
+			}
+			$salida.='</table>';
+		
+		
+		
+		$salida.= '</fieldset>';
+	}
+
+
+	return "<b>Total de participantes:</b> ".$cantidadParticipantes .'<br><br><b>Resultado por categorías:</b><br>'.$salida;
+}

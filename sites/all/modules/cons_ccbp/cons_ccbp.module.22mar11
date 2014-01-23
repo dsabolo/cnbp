@@ -1,0 +1,319 @@
+<?php
+
+function selectlocalidad()
+  { $r = taxonomy_get_tree(5);
+    $f = '';
+    $f .=  '<SELECT NAME="localidad">';
+    $f .= '<OPTION VALUE="">Todas';
+       
+    foreach ($r as $k=>$v)
+      {  $pref='';
+         if ($v->depth) $pref="--";
+         $f .= '<OPTION VALUE="'.$v->tid.'">'.$pref.$v->name;
+
+
+      }
+    $f .= '</select>';
+  return $f;
+  
+
+  }
+function forma_consulta($form_state)
+{
+if(count($form_state['post']) < 2 ){
+$form['host'] = array('#type' => 'value', '#value' => 'cc.bepe.ar:7090/biblios');
+$form['localidad'] = array('#type' => 'value', '#value' => '');
+$form['query'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Expresion'),
+    '#size' => 30,
+    '#maxlength' => 64,
+    '#description' => t('Expresion a buscar'),
+  );
+$form['campo'] = array(
+    '#type' => 'select',
+    '#title' => t('Buscar en'),
+    '#default_value' => "1",
+    '#options' => array("1" => "Todos","2" => "Autor", "3" => "Titulo"),
+    '#description' => t('Campo.'),
+  );
+$vid = 5;
+ $form['localidad'] = array(
+    '#type' => 'hierarchical_select',
+    '#title' => t('Select the tag you wish to use.'),
+    '#size' => 1,
+    '#config' => array(
+      'module' => 'hs_taxonomy',
+      'params' => array(
+        'vid' => $vid,
+      ),
+      'save_lineage'    => 0,
+      'enforce_deepest' => 0,
+      'entity_count'    => 0,
+      'require_entity'  => 0,
+      'resizable'       => 1,
+      'level_labels' => array(
+        'status' => 0,
+        'labels' => array(
+          0 => t('Main category'),
+          1 => t('Subcategory'),
+          2 => t('Third level category'),
+        ),
+      ),
+      'dropbox' => array(
+        'status'   => 0,
+        'title'    => t('All selections'),
+        'limit'    => 0,
+        'reset_hs' => 1,
+      ),
+      'editability' => array(
+        'status'           => 0,
+        'item_types'       => array(),
+        'allowed_levels'   => array(
+          0 => 0,
+          1 => 0,
+          2 => 1,
+        ),
+        'allow_new_levels' => 0,
+        'max_levels'       => 2,
+      ),
+      // These settings cannot be configured through the UI: they can only be
+      // overridden through code.
+      'animation_delay'    => 400,
+      'special_items'      => array(),
+      'render_flat_select' => 0,
+      'path'               => 'hierarchical_select_json',
+    ),
+    '#default_value' => '83',
+  );
+
+$form['submit'] = array('#type' => 'submit', '#value' => t('Enviar consulta'));
+}
+else
+{
+
+//$host[0] = $form_state['post']['host'];
+$host[] ="cc.bepe.ar:7090/biblios";
+$query = $form_state['post']['query'];
+$campo = $form_state['post']['campo'];
+$localidad = $form_state['post']['localidad']['hierarchical_select']['selects'][0]  ;
+$num_hosts = count($host);
+$rows = ccbp_buscar($campo, $query, $localidad, $num_hosts, $host);
+$header =  array("Titulo","Autor","Biblioteca(s)");
+
+echo "cuenta ".count($rows);
+$r = theme_table($header, $rows);
+//print_r($r);
+$form['result'] = array("#value" => $r);
+//$form['result'] = array("#value" => "1111");
+}
+
+
+return $form;
+}
+
+        
+
+function condicion_bib($id)
+  {
+
+$q = "SELECT node.title AS node_title FROM node node 
+INNER JOIN term_node term_node ON node.vid = term_node.vid
+WHERE (node.type in ('biblioteca_popular')) AND (node.status <> 0) AND (term_node.tid = ".$id.")";
+$r = db_query($q);
+$bibs = '';
+$or1='';
+while ($row = db_fetch_array($r))
+     { if ($bibs) $or1 = $or1." @or ";
+       $bibs=$bibs." @attr 1=56 ".$row[node_title]." ";
+     }
+return $or1.$bibs;
+
+
+  }
+
+function nombrebp($titulo)
+  {
+$results = db_query("SELECT node.vid, node_data_field_nombre_bp.field_nombre_bp_value FROM node node 
+LEFT JOIN content_type_biblioteca_popular  node_data_field_nombre_bp ON node.vid = node_data_field_nombre_bp.vid
+
+WHERE (node.type in ('biblioteca_popular') and node.title='%s')", $titulo);
+$fields = db_fetch_array($results);
+$id = $fields['vid'];
+return "<a href=/node/".$id.">".$fields['field_nombre_bp_value']."</a>";
+
+}
+
+function getvaluebytag($index, $vals, $mytag)
+  {
+  $indexfield = $index['DATAFIELD'];
+  foreach ($indexfield as $k=>$v)
+     {if ($vals[$v]['type'] == 'open')
+         { if ($vals[$v]['attributes']['TAG'] == $mytag)
+             { //print "localizado en ".$v." ";
+               //print $vals[$v]['attributes']['TAG']." ";
+               $valor = $vals[$v + 1]['value'];
+               return $valor;
+             }
+          }
+      }
+   return '';
+   }
+function getvaluebytag2($index, $vals, $mytag, $tagtype)
+  {
+  $indexfield = $index[$tagtype];
+  foreach ($indexfield as $k=>$v)
+     {  //print "checando ".$v." ".$vals[$v]['attributes']['TAG']." contra ".$mytag."<br>";
+        if ($vals[$v]['attributes']['TAG'] == $mytag)
+          {
+            $valor = $vals[$v]['value'];
+            return $valor;
+
+           }
+     }
+  return 'no encontrado';
+}
+
+function xmltoarray($rec)
+  {
+    $parser = xml_parser_create();
+    xml_parse_into_struct($parser, $rec, $vals, $index);
+    xml_parser_free($parser);
+    return array('index' => $index, 'vals' => $vals);
+  }
+
+function ccbp_buscar($campo, $query, $localidad, $num_hosts, $host)
+{   $s = '';
+    $prefijo='';
+print $campo." ".$query." ";
+print_r($localidad);
+print " ".$num_hosts." "; print_r($host);
+    switch($campo) {
+        case "2": $prefijo=" @attr 1=1003 @attr 4=1 ";
+                  break;
+        case "3": $prefijo=" @attr 1=4 ";
+                  break;
+                   }
+    $finalquery = $prefijo.'"'.$query.'"';
+    if ($localidad) {
+
+         $condicion_loc=condicion_bib($localidad);
+         $finalquery = "@and ".$condicion_loc." ".$finalquery;
+        }
+    //echo 'You searched for ' . htmlspecialchars($finalquery) . '<br />';
+
+
+    for ($i = 0; $i < $num_hosts; $i++) {
+        $id[] = yaz_connect($host[$i]);
+        yaz_syntax($id[$i], "usmarc");
+        yaz_range($id[$i], 1, 10);
+        yaz_sort($id[$i], "1=1003 ia 1=4 ia");
+        yaz_search($id[$i], "rpn", $finalquery);
+    }
+    yaz_wait();
+    
+    for ($i = 0; $i < $num_hosts; $i++) {
+        echo '<hr />' . $host[$i] . ':';
+        $s .= "debug ".$debug;
+        $error = yaz_error($id[$i]);
+        if (!empty($error)) {
+            echo "Error: $error";
+        } else {
+            $hits = yaz_hits($id[$i]);
+            echo "Result Count $hits";
+        }
+        $table_results=array();
+        $table_results['data']=array();
+        $p =1;
+        $rec = yaz_record($id[$i], $p, "xml");
+        $res = xmltoarray($rec);
+        $index = $res['index'];
+        $vals  = $res['vals'];
+        $autor_actual=getvaluebytag($index, $vals, '100');
+        $autor = $autor_actual;
+
+        $titulo_actual=getvaluebytag($index, $vals, '245');
+        $titulo = $titulo_actual;
+        $bib = getvaluebytag2($index, $vals, '003','CONTROLFIELD');
+        $nombrebp = nombrebp($bib);
+        $nbib=0;
+        $bibs = array();
+
+        while (($p <= 100) && $rec ) {
+            while ((strtolower($autor) == strtolower($autor_actual)) && (strtolower($titulo) == strtolower($titulo_actual)) && ($rec))
+               {$bibs[$nbib]=$bib;
+                $nbib++; 
+            	$p++;
+            	$rec = yaz_record($id[$i], $p, "xml");
+
+            	$res = xmltoarray($rec);
+            	$index = $res['index'];
+            	$vals  = $res['vals'];
+            	if ($debug) $s .= "<pre>".var_export($vals, TRUE)."</pre>";
+                if ($rec)
+                   {
+            		$autor= getvaluebytag($index, $vals, '100');
+            		$titulo= getvaluebytag($index, $vals, '245');
+            		$ed = getvaluebytag($index, $vals, '250');
+            		$bib = getvaluebytag2($index, $vals, '003','CONTROLFIELD');
+            		$nombrebp = nombrebp($bib);
+                   }
+		}
+            $s .= "titulo:".$titulo_actual."<br>";
+            $s .= "autor:".$autor_actual."<br>";
+            $sbibs = "Biblioteca(s):";
+            for ($indx=0; $indx< $nbib; $indx++) {
+                        $sbibs .= ' '.$bibs[$indx].'-'.nombrebp($bibs[$indx]." "); 
+                        }
+            $s .= $sbibs;
+            $table_results[]=array($titulo_actual, $autor_actual, $sbibs);
+            //$s .= "edicion ".$ed."<br>";
+            //$s .= "No. bib ".$bib."<br>"; 
+            //$s .= "nombre bib ".$nombrebp;
+            $s .= "<hr>";
+            $titulo_actual = $titulo;
+            $autor_actual =  $autor;
+            $bibs = array();
+            $nbib = 0;
+            } //while (($p <= 100) && $rec)
+    }
+//return $s;
+return $table_results;
+}
+
+
+
+function cons_ccbp_all_old() {
+$host=$_REQUEST[host];
+$query=$_REQUEST[query];
+$campo=$_REQUEST[campo];
+$localidad=$_REQUEST[localidad];
+$debug = 0;
+if ($_REQUEST[debug]) {$debug = 1;};
+//$debug = $_REQUEST[debug]; 
+$num_hosts = count($host);
+if (empty($query) || count($host) == 0) return forma_consulta();
+return ccbp_buscar($campo, $query, $localidad, $num_hosts, $host);
+}
+
+function cons_ccbp_all() {
+return drupal_get_form('forma_consulta');
+
+}
+
+
+
+
+
+function cons_ccbp_menu() {
+
+  $items = array();
+  $items['cons_ccbp'] = array(
+    'title' => 'consulta catalogo colectivo',
+    'page callback' => 'cons_ccbp_all',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+return $items;
+}
+

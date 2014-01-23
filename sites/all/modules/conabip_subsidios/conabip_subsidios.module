@@ -1,0 +1,130 @@
+<?php 
+
+/*PERMS*/
+function conabip_subsidios_perm() {
+  return array('consultar subsidios');
+} 
+
+/*MENU*/
+function conabip_subsidios_menu() {
+
+  $items = array();
+
+
+  $items['subsidios'] = array(
+    'title' => 'Consultar Subsidios por número de registro',
+    'description' => '',
+    'page callback' => 'conabip_subsidios_all',   
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('consultar subsidios'),
+   );
+
+  $items['area_bp'] = array(
+    'title' => 'Area BP',
+    'description' => 'Area Pública y Pirvada de las BP´s',
+    'page callback' => 'conabip_bps',   
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('consultar subsidios'),
+   );
+ 
+
+  return $items;
+}
+
+
+
+
+
+/*PAGINA PPAL*/
+function conabip_subsidios_all(){
+		$form='<br/><br/><form id="formSubsidios" action="/subsidios">
+	<label>Complete su número de registro de BP:</label>
+	<input name="registro" class="form-text" value="'.$_GET['registro'].'" type="text"/> <input  class="form-submit" type="submit" value="Consultar Subsidios"></form>';
+	
+	if($_GET['registro']){
+		
+		$query=db_query('SELECT  tipo, nroRes, MontoOtorgado, EstadoPago, FechaDeposito, Vto FROM subsidios_x WHERE NroRegistro="%s"',$_GET['registro']);
+		
+		$count = db_affected_rows();
+	
+		if($count>0){
+
+				while($result=db_fetch_array($query)){
+					
+					
+					if($result['Vto'] == "1899-12-31 00:00:00"){$result['Vto']="";}
+					if($result['Vto']=='1899-12-31'){$result['Vto']="";}
+	
+					if($result['Vto']!=""){$result['Vto']=  date('d-m-Y',strtotime($result['Vto']));}
+					$result['FechaDeposito']=date('d-m-Y',strtotime($result['FechaDeposito']));
+					$result['MontoOtorgado'] = '$ '.number_format($result['MontoOtorgado'],0,',','.');
+					$resultTable []= $result;
+					}
+					
+		$resultTable=theme('table',array('Tipo Resolución','Nro de Resolución','Monto Otorgado','Estado del Pago','Fecha','Vencimiento'),$resultTable);
+			$datosBP=db_query('SELECT * FROM subsidios_x WHERE NroRegistro="%s" LIMIT 1',$_GET['registro']);
+			while($dato=db_fetch_array($datosBP)){
+							$datoBP='<br/>Para la <strong>'.$dato['DenominacionBP'].'</strong> de <strong>'.$dato['Provincia'].'</strong> se han encontrado <strong>'.$count.'</strong> subsidios';	
+							}
+			}
+			
+
+		
+
+		
+		$resultados= $datoBP.'<!-- br/>Al día '.date('d/m/Y',time()).' para la BP <strong>'.$_GET['registro'].'</strong> se han encontrado '.$count.' subsidio/s asignado/s.<br/ -->';
+		$resultados.= $resultTable; 
+		}
+	
+	if($count>0){
+			return $form.$resultados.'<p class="leyendaSubsidios"><br>Ante problemas en la cuenta por favor dirijase a su sucursal bancaria a efectos de corroborar el estado de la misma y recuerde informar la situación al mail <a href="mailto:abenef@conabip.gov.ar">abenef@conabip.gov.ar</a> o telefónicamente al <b>0800-444-0068</b>.</p>';
+
+	}
+	else {
+		return $form."<br><br>No se han encontrados subsidios para el registro ingresado.";
+	}
+	
+	
+}
+
+
+
+
+function conabip_subsidios_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    $blocks[0] = array(
+      'info' => t('Hola!BP'), 
+    );
+
+
+    return $blocks;
+  }
+  else if ($op == 'view') {
+    switch ($delta) {
+      case 0:
+        // Your module will need to define this function to render the block.
+        $block = array(
+          'subject' => t('Bienvenido'), 
+          'content' => conabip_subsidios_display_block_1(),
+        );
+        break;
+    }
+    return $block;
+  }
+}
+
+function  conabip_subsidios_display_block_1(){
+		
+	global $user;profile_load_profile(&$user);	
+	if($user->roles[18]){
+	}
+		return 'Hola! <b>'.$user->profile_nom_biblioteca.'</b> <br/><a href="http://www.conabip.gob.ar/subsidios?registro='.$user->profile_nro_reg_conabip.'">Consulta de Subsidios</a>&nbsp;&nbsp;&nbsp;'.l('Salir','logout');
+	
+	}
+
+function conabip_bps(){
+	return "hola!";
+}
+
+?>
+

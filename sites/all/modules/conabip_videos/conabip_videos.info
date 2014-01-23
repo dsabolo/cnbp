@@ -1,0 +1,5 @@
+name = CONABIP Canal BP
+description = Canal de Videos de CONABIP
+core = 6.x
+package = "Conabip"
+version = 6.02

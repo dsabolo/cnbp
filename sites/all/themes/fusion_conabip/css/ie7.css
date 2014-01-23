@@ -1,0 +1,25 @@
+#header-group-inner #block-user-0 #user-login-form div.item-list ul li.last {
+	margin-top:-20px !important;
+	text-indent: 0 !important;
+ }
+
+#header-group-inner #block-user-0 #user-login-form div.item-list ul li.last  a {
+	
+	width:20px;
+	height:20px;
+	display: block;
+	background: none;
+	text-indent:-999999px;
+	 }
+	 
+	 
+
+	 /* ----- contacto ------*/
+#block-block-12 {
+ z-index:99 !important;
+ background:url(images/block-12b-bg.png) no-repeat; z-index:99;
+ 
+ }
+ #block-block-12 a {
+ 	margin-left: -320px;
+ }

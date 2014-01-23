@@ -1,0 +1,4 @@
+name = CONABIP Subsidios a BP
+description = Permite hacer consultas sobre las asignaciones a partír de un registro.
+core = 6.x
+package = "Conabip"

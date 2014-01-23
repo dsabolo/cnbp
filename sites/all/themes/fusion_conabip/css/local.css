@@ -1,0 +1,418 @@
+/* $Id: local-sample.css,v 1.1.2.1 2010/01/11 00:08:12 sociotech Exp $ */
+
+/****************************/
+/* LOCAL CSS                */
+/****************************/
+
+/* Put your custom CSS and CSS overrides in this file and  */
+/* rename it local.css.  By restricting your CSS changes   */
+/* to local.css, your changes will not be overwritten when */
+/* upgrading to a new version of this theme.  You can also */
+/* use a local-rtl.css file for the equivalent in RTL.     */
+
+/* Steps to activate local.css:                       */
+/* 1. Add your custom CSS to this file                */
+/* 2. Rename this file to local.css                   */
+/* 3. Clear cached data at admin/settings/performance */
+
+body {
+  color: #636466;
+}
+
+a,
+a:link,
+a:visited {
+  color: #0193CC;
+}
+
+/* Hover/active link styles. Don't forget :focus for accessibility */
+a:hover,
+a:focus,
+a:active {
+  color: #FA8639;
+}
+
+/* Regions
+
+  Classes (.region-name) should always be used instead of IDs (#region-name) so
+  that Skinr styles can override them with a class later
+-------------------------------------------------------------- */
+
+/* All Regions
+-------------------------------------------------------------- */
+/* By default this wrapper is set to 100% width and centered -- override here to
+  narrow wrapper or align left or right */
+.page {
+}
+
+/* The 0 values here remove padding and spacing at the bottom of the page.
+  Remove to add a gap at the very bottom of the page */
+.page-inner {
+  border: 0;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+/* HTML Elements
+-------------------------------------------------------------- */
+h1 {
+  font-size: 142.85%;
+  color: #008FAD;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+
+h2 {
+  #font-size: 142.85%;
+  #font-size: 114.28%;
+  font-size: 100%;
+  text-transform: uppercase;
+  font-weight: normal;
+  color: #FA8639;
+  border-bottom: 1px solid #BFBEA9;
+}
+
+h3 {
+  font-size: 100%;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #0E5F7A;
+  border-bottom: 1px solid #BFBEA9;
+}
+
+h4 {
+  font-size: 100%;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #0E5F7A;
+}
+
+h5 {
+  font-size: 90%;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #008FAD;
+}
+
+h6 {
+  font-size: 90%;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #FA8639;
+}
+
+.footer-wrapper {
+}
+
+#footer {
+  font-size: 95%;
+}
+
+
+/* Nodes
+/-------------------------------------------------------------- */
+/* bylines and taxonomy */
+.submitted,
+.terms {
+  font-size: 95%;
+}
+
+.terms {
+  line-height: 130%;
+}
+
+.terms {
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #BFBEA9;
+}
+
+.node .read-more,
+.node .more-link,
+.node .links {
+  font-size: 95%;
+}
+
+
+/* Comments
+/-------------------------------------------------------------- */
+div.comment div.links a,
+div.comment ul.links a {
+  font-size: 90%;
+}
+
+.signature {
+  font-size: 91.6%;
+}
+
+
+/* Links
+/-------------------------------------------------------------- */
+/* breadcrumbs */
+.breadcrumbs {
+  font-size: 90%;
+  line-height: 100%;
+}
+
+/* pagers */
+ul.pager {
+  font-size: 90%;
+  line-height: 150%;
+}
+
+ul.pager li {
+  line-height: 250%;
+}
+
+
+/* Lists
+/-------------------------------------------------------------- */
+li,
+li.leaf,
+ul.menu li,
+.item-list ul li {
+  line-height: 150%;
+}
+
+
+/* Primary Menu
+/-------------------------------------------------------------- */
+/* use ID to override overflow: hidden for .block, dropdowns should always be visible */
+#primary-menu {
+  font-size: 100%;
+  text-transform: uppercase;
+  font-weight: normal;
+  overflow: visible;
+  border-bottom: 1px solid #BFBEA9;
+
+}
+
+/* remove left margin from primary menu list */
+#primary-menu.block ul {
+  margin-left: 0; /* LTR */
+}
+
+/* remove bullets, float left */
+.primary-menu ul li {
+  float: left; /* LTR */
+  list-style: none;
+  position: relative;
+}
+
+/* style links, and unlinked parent items (via Special Menu Items module) */
+.primary-menu ul li a,
+.primary-menu ul li .nolink {
+  display: block;
+  padding: 0.75em 1em;
+  text-decoration: none;
+}
+
+/* Add cursor style for unlinked parent menu items */
+.primary-menu ul li .nolink {
+  cursor: default;
+}
+
+/* remove outline */
+.primary-menu ul li:hover,
+.primary-menu ul li.sfHover,
+.primary-menu ul a:focus,
+.primary-menu ul a:hover,
+.primary-menu ul a:active {
+  outline: 0;
+}
+
+/* styles for Superfish primary menu */
+.primary-menu-inner ul.sf-menu {
+}
+
+/* Link style for top level menu items, add padding here */
+.primary-menu-inner ul.sf-menu a,
+.primary-menu-inner ul.sf-menu a:visited  {
+  color: #0193CC;
+  padding-left: 1em;
+
+}
+
+.primary-menu-inner ul.sf-menu a:hover,
+.primary-menu-inner ul.sf-menu a:active,
+.primary-menu-inner ul.sf-menu a:focus {
+  color: #FA8639;
+}
+
+/* These are the top level menu items, add border-right here for separators */
+.primary-menu-inner ul.sf-menu li {
+}
+
+/* Add border-right: 0; here to remove separator on last menu item */
+.primary-menu-inner ul.sf-menu li.last {
+}
+
+/* Style for container of dropdown, add background or border */
+.primary-menu-inner ul.sf-menu ul {
+  border: 1px solid #BFBEA9;
+  width: 180px 
+
+}
+
+/* Style for individual dropdown menu items, add border-bottom for separators */
+.primary-menu-inner ul.sf-menu li li {
+  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.90);
+}
+
+.primary-menu-inner ul.sf-menu li li.last {
+
+}
+
+.primary-menu-inner ul.sf-menu li li li {
+}
+
+/* Style for hover of dropdown menu items (add background-color here) */
+.primary-menu-inner ul.sf-menu li ul li:hover,
+.primary-menu-inner ul.sf-menu li ul li.sfHover {
+}
+
+.banner-slideshow .views-row {
+  background-color: #F5F6F7;
+  height: 240px;
+}
+
+.banner-slideshow .views-field-image-attach-images {
+  float: left;
+  padding-right: 1.75em;
+}
+
+.banner-slideshow .views-field-tid {
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #BFBEA9;
+  padding-top: 1.75em;
+  padding-right: 1.75em;
+  padding-bottom: 0.75em;
+}
+
+.banner-slideshow .views-field-title {
+  font-size: 142.85%;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #47CAE6;
+  padding-right: 1.75em;
+}
+
+.banner-slideshow .views-field-body {
+  padding-right: 1.75em;
+  padding-bottom: 1.75em;
+
+}
+
+/*
+** Tab navigation
+*/
+ul.primary {
+  border-collapse: collapse;
+  white-space: nowrap;
+  list-style: none;
+  margin-left: 0; /* LTR */
+  height: auto;
+  border-bottom: 0;
+  padding: 0.75em 0.75em;
+
+}
+
+ul.primary li {
+  display: inline;
+  margin: 3px 3px 3px 0;
+}
+
+ul.primary li a {
+  background-color: #F5F6F7;
+  height: auto;
+  padding: 6px 12px;
+  text-decoration: none;
+  border: 1px solid #BFBEA9;
+}
+
+ul.primary li.active a,
+ul.primary li a:hover,
+ul.primary li a:focus {
+  background-color: #ffffff;
+  border: 1px solid #BFBEA9;
+  outline: none;
+  opacity: 0.8;
+}
+ul.primary li a:hover {
+  opacity: 0.8;
+}
+
+/* Pagers
+-------------------------------------------------------------- */
+ul.pager {
+color: #636466;
+}
+
+ul.pager li {
+}
+
+ul.pager a,
+ul.pager li.pager-current {
+  border-color: #BCBDC1;
+	color: #636466;
+}
+
+ul.pager li.pager-current {
+  background-color: #BCBDC1;
+  color: #fff;
+}
+
+ul.pager a:hover,
+ul.pager a:active,
+ul.pager a:focus {
+  background-color: #BCBDC1;
+  border-color: #BFBEA9;
+  color: #fff;
+}
+
+/* Tables
+-------------------------------------------------------------- */
+table {
+}
+
+/* Body of tables */
+tbody {
+  border-top: 1px solid #BFBEA9;
+}
+
+/* Header of tables */
+thead th,
+th {
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #008FAD;
+  border-bottom: 1px solid #BFBEA9;
+}
+
+tbody th {
+  border-bottom: 1px solid #BFBEA9;
+}
+
+/* Alternating row background styles */
+tr.even,
+tr.even td {
+  background-color: #F5F6F7;
+  border-bottom: 1px solid #BFBEA9;
+}
+
+tr.odd,
+tr.odd td {
+  background-color: #fff;
+  border-bottom: 1px solid #BFBEA9;
+}
+
+td.active {
+}
+
+tr.drag td,
+tr.drag-previous td {
+  color: #636466;
+}

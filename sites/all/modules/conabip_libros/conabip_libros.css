@@ -1,0 +1,14 @@
+
+#pid-encuesta-libros fieldset {
+	border: 0 !important;
+	background: #eee;
+	margin-bottom:20px !important
+}
+
+#pid-encuesta-libros fieldset legend {
+	background: #eee;
+	display: block;
+	font-size: 20px;
+	font-weight: bold;
+}
+

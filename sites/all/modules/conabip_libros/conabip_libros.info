@@ -1,0 +1,5 @@
+name = CONABIP Encuesta Libros
+description = Desarrollo de la encuesta de libros
+core = 6.x
+package = "Conabip"
+version = 6.02

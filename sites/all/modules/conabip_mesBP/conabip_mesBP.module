@@ -1,0 +1,89 @@
+<?php 
+
+/*PERMS*/
+function conabip_mesBP_perm() {
+  return array('acceder al calendario del mes de las BPs');
+} 
+
+/*MENU*/
+function conabip_mesBP_menu() {
+
+  $items = array();
+
+
+  $items['mes_de_las_bibliotecas'] = array(
+    'title' => 'Septiembre, Mes de las Bibliotecas Populares',
+    'description' => '',
+    'page callback' => 'conabip_mesBP_all',   
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('acceder al calendario del mes de las BPs'),
+   );
+
+ 
+
+  return $items;
+}
+
+
+
+
+
+/*PAGINA CALENDARIO*/
+function conabip_mesBP_all(){
+	drupal_add_css('sites/all/modules/conabip_mesBP/conabip_mesBP.css');
+	drupal_add_js('sites/all/modules/conabip_mesBP/conabip_mesBP.js');
+	
+	
+	
+	
+	
+	if($_GET['dia']){
+		
+		$query = db_query("SELECT node.nid AS nid,
+   node_data_field_fechaevento.field_fechaevento_value AS node_data_field_fechaevento_field_fechaevento_value
+ FROM node node 
+ LEFT JOIN content_field_fechaevento node_data_field_fechaevento ON node.vid = node_data_field_fechaevento.vid
+ WHERE ((node.status <> 0) AND (node.type in ('agendabp')))
+    AND (DATE_FORMAT(ADDTIME(node_data_field_fechaevento.field_fechaevento_value, SEC_TO_TIME(-10800)), '%Y-%m-%d') <= '2012-09-02')
+   ORDER BY node_data_field_fechaevento_field_fechaevento_value ASC");
+		
+	
+		while($result = db_fetch_array($query)){
+			$salida.= node_view(node_load($result['nid']));
+		}
+	return $salida;
+	}
+	else {
+	
+		$query = db_query('SELECT node.nid AS nid,
+   node_data_field_fechaevento.field_fechaevento_value AS node_data_field_fechaevento_field_fechaevento_value
+ FROM node node 
+ LEFT JOIN content_field_fechaevento node_data_field_fechaevento ON node.vid = node_data_field_fechaevento.vid
+ WHERE (node.status <> 0) AND (node.type in (\'agendabp\'))
+   ORDER BY node_data_field_fechaevento_field_fechaevento_value ASC');
+		
+	
+		while($result = db_fetch_array($query)){
+			$salida.= node_view(node_load($result['nid']));
+		}
+	
+		
+		return $salida;
+		
+	}
+	
+	
+	
+	
+	
+}
+
+
+
+
+
+
+   
+
+?>
+

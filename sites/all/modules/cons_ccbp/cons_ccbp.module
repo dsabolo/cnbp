@@ -1,0 +1,824 @@
+<?php
+
+function rec_by_id($rec_id)
+{
+
+$host="cc.bepe.ar:7090/biblios";
+$id = yaz_connect($host);
+yaz_syntax($id, "usmarc");
+yaz_sort($id, "1=1003 ia 1=4 ia");
+$finalquery = $rec_id;
+yaz_search($id, "rpn", $finalquery);
+yaz_wait();
+$error = yaz_error($id);
+if (!empty($error)) {
+            echo "Error: $error";
+        } else {
+            $hits = yaz_hits($id);
+            //echo "Result Count $hits";
+        }
+$rec = yaz_record($id, 1, "xml");
+return $rec;
+phpinfo();
+
+}
+
+
+
+function forma_item($form_state)
+{
+
+$bib_id = $_GET['bib_id']; 
+$rec = rec_by_id($bib_id);
+//print_r($rec);
+$param_bibs  = $_GET['bibs'];
+$bibs = explode('/',$param_bibs);
+$nombre_bibs = array('data' => array());
+for ($i=0;$i < count($bibs) - 1;$i++)
+   { if (($bibs[$i]) && ($bibs[$i] != 'no'))
+    $nombre_bibs[]=array(nombrebp($bibs[$i]));
+   }
+$header = array('Bibliotecas');
+$tabla_bibs =  theme_table($header, $nombre_bibs);
+$res = xmltoarray($rec);
+$index = $res['index'];
+$vals  = $res['vals'];
+$autor = getvaluebytag($index, $vals, '100', 'a');
+$titulo = getvaluebytag($index, $vals, '245', 'a');
+$editorial = getvaluebytag($index, $vals, '260', 'b');
+$anio = getvaluebytag($index, $vals, '260', 'c');
+$lugar = getvaluebytag($index, $vals, '260', 'a');
+$isbn = getvaluebytag($index, $vals, '20', 'a');
+$form['titulo'] = array('#type' => 'item',
+                        '#value' => $titulo,
+    );
+
+if ($autor)
+   $form['autor'] = array('#type' => 'item',
+                        '#value' => 'Por '.$autor,
+    );
+
+$tlugar='';
+if ($lugar) $tlugar = '('.$lugar.")";
+if ($editorial)
+   $form['editorial'] = array('#type' => 'item',
+                        '#value' => 'Publicado por '.$editorial.$tlugar,
+    );
+if ($anio)
+   $form['anio'] = array('#type' => 'item',
+                        '#value' => 'A&ntilde;o:'.$anio,
+    );
+if ($isbn)
+	$form['isbn'] = array('#type' => 'item',
+                        '#value' => 'ISBN:'.$isbn,
+    );
+
+$form['mensaje_de_error'] = array('#type' => 'item',
+                        '#value' => $mensaje_de_error,
+    );
+$form['bibs'] = array('#type' => 'item',
+                        '#value' => $tabla_bibs,
+    );
+
+return $form;
+}
+function forma_consulta($form_state)
+{
+$bib_id = $_GET['bib_id']; 
+$debug = $_GET['debug'];
+global $vars_forma_consulta;
+if ($vars_forma_consulta[start] < 1) {$vars_forma_consulta[start]=1;}
+if ( ! isset($vars_forma_consulta[hits])  ) {$vars_forma_consulta[hits]=0;}
+if (($bib_id) )
+   { $vars_forma_consulta[bib_id]=$bib_id;}
+$resultados = '';
+if (isset($vars_forma_consulta[sent])) $resultados='<p id="resultadosObtenidos">Resultados obtenidos:'.$vars_forma_consulta[hits].'</p>';
+$form['banner'] = array('#type' => 'item', 
+                        '#value' => $banner_cc, 
+    );
+$form['Titulo'] = array('#type' => 'item', 
+                        '#value' => '<h2>Cat&aacute;logo colectivo de las bibliotecas populares</h2>', 
+    );
+$form['texto_llave'] = array('#type' => 'item', 
+                        '#value' => '<p>En el marco del Plan de Inclusi&oacute;n Digital, se inici&oacute; la informatizaci&oacute;n 
+de la gesti&oacute;n bibliotecol&oacute;gica de las bibliotecas populares de Argentina.
+
+Las acciones incluyen la automatizaci&oacute;n de los cat&aacute;logos bibliogr&aacute;ficos, 
+abriendo las puertas a un nuevo concepto de cooperaci&oacute;n bibliotecaria a 
+trav&eacute;s de la creaci&oacute;n del cat&aacute;logo colectivo. Aqu&iacute; se puede consultar el 
+acervo bibliogr&aacute;fico de las bibliotecas que est&aacute;n participando de este 
+proceso.</p>',
+    );
+$form['query'] = array(
+    '#type' => 'textfield',
+    '#title' => t('B&uacute;squeda simple'),
+    '#size' => 30,
+    '#default_value' => $vars_forma_consulta[query],
+    '#maxlength' => 64,
+    //'#description' => t('Expresion a buscar'),
+  );
+$form['debug'] = array('#type' => 'value', '#value' => $debug);
+$form['qstart'] = array('#type' => 'value', '#value' => $vars_forma_consulta[start]);
+//$form['campo'] = array(
+//    '#type' => 'select',
+//    '#title' => t('Buscar en'),
+//    '#default_value' => $vars_forma_consulta[campo],
+//    '#options' => array("1" => "Todos","2" => "Autor", "3" => "Titulo"),
+//  );
+$form['hr1'] = array('#type' => 'item', 
+                        '#value' => '<hr>',
+    );
+$form['bp_nombre'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Nombre de la biblioteca'),
+    '#size' => 60,
+    '#default_value' => $vars_forma_consulta[bp_nombre],
+    '#maxlength' => 64,
+    //'#description' => t('Expresion a buscar'),
+  );
+$vid = 5;
+$form['localidad'] = array(
+    '#type' => 'hierarchical_select',
+    '#title' => t('Seleccionar la provincia'),
+    '#size' => 1,
+    '#default_value' => $vars_forma_consulta[loc],
+    '#config' => array(
+      'module' => 'hs_taxonomy',
+      'params' => array(
+        'vid' => $vid,
+      ),
+      'save_lineage'    => 0,
+      'enforce_deepest' => 0,
+      'entity_count'    => 0,
+      'require_entity'  => 0,
+      'resizable'       => 1,
+      'level_labels' => array(
+        'status' => 0,
+        'labels' => array(
+          0 => t('Main category'),
+          1 => t('Subcategory'),
+          2 => t('Third level category'),
+        ),
+      ),
+      'dropbox' => array(
+        'status'   => 0,
+        'title'    => t('All selections'),
+        'limit'    => 0,
+        'reset_hs' => 1,
+      ),
+      'editability' => array(
+        'status'           => 0,
+        'item_types'       => array(),
+        'allowed_levels'   => array(
+          0 => 0,
+          1 => 0,
+          2 => 1,
+        ),
+        'allow_new_levels' => 0,
+        'max_levels'       => 2,
+      ),
+      // These settings cannot be configured through the UI: they can only be
+      // overridden through code.
+      'animation_delay'    => 400,
+      'special_items'      => array(),
+      'render_flat_select' => 0,
+      'path'               => 'hierarchical_select_json',
+    ),
+  );
+$form['titulo'] = array(
+    '#type' => 'textfield',
+    '#title' => t('T&iacute;tulo'),
+    '#size' => 30,
+    '#default_value' => $vars_forma_consulta[titulo],
+    '#maxlength' => 64,
+  );
+$form['autor'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Autor'),
+    '#size' => 30,
+    '#default_value' => $vars_forma_consulta[autor],
+    '#maxlength' => 64,
+  );
+$form['tema'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Tema'),
+    '#size' => 30,
+    '#default_value' => $vars_forma_consulta[tema],
+    '#maxlength' => 64,
+  );
+$form['isbn'] = array(
+    '#type' => 'textfield',
+    '#title' => t('ISBN/ISSN'),
+    '#size' => 30,
+    '#default_value' => $vars_forma_consulta[isbn],
+    '#maxlength' => 64,
+  );
+$form['submit'] = array('#type' => 'submit', 
+                        '#value' => t('Enviar consulta'),
+    );
+
+
+$form['hits'] = array('#type' => 'item', 
+                        '#value' => $resultados, 
+    );
+
+$form['Mensaje_error'] = array('#type' => 'item', 
+                        '#value' => "<span class='consulta_cc_error'> $vars_forma_consulta[mensaje_de_error] </span>",
+    );
+if(isset($form_state['storage']['results']) && (! $vars_forma_consulta[mensaje_de_error]))
+{
+  $form['results'] = array
+  (
+    '#value' => $form_state['storage']['results']['#value']
+  );
+
+
+$form['submit_prev'] = array('#type' => 'submit', 
+                        '#value' => t('Anteriores'),
+                        '#disabled' => $vars_forma_consulta[start] <2,
+    );
+
+$form['submit_next'] = array('#type' => 'submit', 
+                       '#value' => t('Siguientes'),
+                       '#disabled' => (($vars_forma_consulta[hits] - $vars_forma_consulta[start]) < 100),
+    );
+
+
+}
+
+
+return $form;
+}
+
+function forma_consulta_submit($form, &$form_state) {        
+global $vars_forma_consulta;
+$vars_forma_consulta[sent]=1;
+//if ($vars_forma_consulta[start] < 1) {print "init start"; $vars_forma_consulta[start]=1;}
+$vars_forma_consulta[start]=$form_state['values']['qstart'];
+//print_r($form_state['values']['op']);
+if ($form_state['values']['op'] == 'Enviar consulta') $vars_forma_consulta[start] = 1;
+if ($form_state['values']['op'] == 'Siguientes') $vars_forma_consulta[start] += 100;
+if ($form_state['values']['op'] == 'Anteriores') 
+      {$vars_forma_consulta[start] -= 100;
+       if ($vars_forma_consulta[start] <1) $vars_forma_consulta[start]=1;
+      }
+//print " start:".$vars_forma_consulta[start];
+$host[] ="cc.bepe.ar:7090/biblios";
+$query = $form_state['values']['query'];
+$campo = $form_state['values']['campo'];
+$debug = $form_state['values']['debug'];
+$localidad = $form_state['values']['localidad']  ;
+$bp_nombre = $form_state['values']['bp_nombre']  ;
+$autor = $form_state['values']['autor']  ;
+$tema = $form_state['values']['tema']  ;
+$isbn = $form_state['values']['isbn']  ;
+$titulo = $form_state['values']['titulo']  ;
+$bib_id = $form_state['values']['bib_id']  ;
+$num_hosts = count($host);
+$respuesta = ccbp_buscar($campo, $query, $localidad, $num_hosts, $host, $vars_forma_consulta[start], $autor, $titulo, $tema, $bib_id, $bp_nombre, $isbn, $debug);
+$rows = $respuesta[0];
+$last_hits = $respuesta[1];
+$vars_forma_consulta[mensaje_de_error] =  $respuesta[2];
+$header =  array("Resultados");
+$r = theme_table($header, $rows);
+$form_state['storage']['results']=array("#value" => $r);
+$vars_forma_consulta[query]= $query;
+$vars_forma_consulta[loc]=$localidad;
+$vars_forma_consulta[bp_nombre]=$bp_nombre;
+$vars_forma_consulta[campo]=$campo;
+$vars_forma_consulta[autor]=$autor;
+$vars_forma_consulta[tema]=$tema;
+$vars_forma_consulta[titulo]=$titulo;
+$vars_forma_consulta[isbn]=$isbn;
+$vars_forma_consulta[hits]=$last_hits;
+}
+
+function condicion_bib($id, $bp_nombre)
+  {
+// genera la lista de bp que cumple con una o dos condiciones
+// $id es el nid de una localidad (taxonomia)
+// $bp_nombre es el nombre de una biblioteca (str)
+$condicion_id = '';
+$condicion_nombre = '';
+if ($id)
+   {$condicion_id = "(term_node.tid = ".$id.")";}
+   
+$bp_nombre = trim(str_replace( "'", "", $bp_nombre));
+if ($bp_nombre)
+   {
+      //$bp_nombre = strtoupper($bp_nombre);
+      $condicion_nombre = "( UPPER(node_data_field_nombre_bp.field_nombre_bp_value) like '%".$bp_nombre."%')";}
+$condicion = '';
+if ($condicion_id) {$condicion = $condicion_id;}
+if ($condicion_nombre)
+    {
+    	if ($condicion) {$condicion = $condicion." AND ".$condicion_nombre;}
+     	else {$condicion = $condicion_nombre;}
+                     
+    }
+$q = "SELECT node.title AS node_title, content_type_biblioteca_popular.field_con_digibepe_value as digibepe FROM node node 
+INNER JOIN term_node term_node ON node.vid = term_node.vid
+ LEFT JOIN content_field_nombre_bp node_data_field_nombre_bp ON node.vid = node_data_field_nombre_bp.vid
+ LEFT JOIN content_type_biblioteca_popular ON node.vid = content_type_biblioteca_popular.vid
+WHERE (node.type in ('biblioteca_popular')) AND (node.status <> 0) AND $condicion";
+
+if($_GET['xx']) {print $q;}
+
+if($_GET['debug']){print $condicion;}
+
+$r = db_query($q);
+$bibs = '';
+$or1='';
+$con_digibepe=0;
+//generacion de la condicion en base a los titulos (en realidad # de bib)
+while ($row = db_fetch_array($r))
+     { if ($bibs) $or1 = $or1." @or ";
+       //$bibs=$bibs.' @attr 1=56 "'.$row[node_title].'" ';
+     $bibs=$bibs.' @attr 1=homebranch "'.$row[node_title].'" ';
+       $con_digibepe += $row[digibepe];
+     }
+$error = '';
+if ($debug) print_r($bibs);
+if ((! $bibs) or (! $con_digibepe))
+    {  $razon1 = '';
+       $razon2 = '';
+       $conectivo = '';
+       $digitalizadas = '';
+       //if ((! $con_digibepe) && ($bibs))
+       //		$digitalizadas = 'utilizando DIGIBeP&eacute; 2010 ';
+       if ($id) $razon1 = "en la ubicaci&oacute;n especificada";
+       if ($bp_nombre) $razon2 = "con el nombre especificado";
+       if ( ($razon1) && ($razon2) ) $conectivo = ' o ';
+       $no_hay = "No se encontraron bibliotecas populares ";
+       $error = $no_hay.$digitalizadas.$razon1.$conectivo.$razon2;
+       if ((! $con_digibepe) && ($bibs))
+            {
+             if ($id) $error = "La(s) Biblioteca(s) Popular(es) de la ubicaci&oacute;n especificada no se encuentra(n) registrada(s) en el Cat&aacute;logo Colectivo de la Conabip";
+             if ($bp_nombre) $error = "La(s) Biblioteca(s) Popular(es) con el nombre especificado no se encuentra(n) registrada(s) en el Cat&aacute;logo Colectivo de la Conabip";
+
+            }
+     }
+$resultado = array($or1.$bibs, $error);
+
+if($_GET['debug']){ print "RESULTADO DEBUG"; print_r ($resultado);}
+if($_GET['xx']) {print_r ($resultado);}
+
+return $resultado;
+
+
+  }
+function clean_str($a)
+{ 
+  $b = $a; 
+  $b=str_replace(",","",$b);
+  $b=str_replace(" ","",$b);
+  $b=str_replace(".","",$b);
+  $b=str_replace(";","",$b);
+  $b=str_replace("/","",$b);
+  $b = strtolower($b);
+  return $b;
+
+}
+
+
+function nombrebp($titulo)
+  {
+$results = db_query("SELECT node.vid, node_data_field_nombre_bp.field_nombre_bp_value AS field_nombre_bp_value  FROM node node  LEFT JOIN content_field_nombre_bp node_data_field_nombre_bp ON node.vid = node_data_field_nombre_bp.vid WHERE (node.type in ('biblioteca_popular')) AND ((node.title) = ('%s'))", $titulo);
+$fields = db_fetch_array($results);
+$id = $fields['vid'];
+return '<a href=/biblioteca_popular/detalle/'.$id.'?custom_modal=1  rel="lightframe">'.$fields['field_nombre_bp_value']."</a>";
+
+}
+
+function getvaluebytag($index, $vals, $mytag, $mycode)
+  {
+  $indexfield = $index['DATAFIELD'];
+  $tipo =  gettype($indexfield);
+  //print_r($index);
+  if ($tipo != 'array')  //situacion anomala
+      {  //print_r($index);
+            //print_r($vals);
+
+         return "";
+      }
+
+  foreach ($indexfield as $k=>$v)
+     {if ($vals[$v]['type'] == 'open')
+         { if ($vals[$v]['attributes']['TAG'] == $mytag)
+             { 
+               
+               $v2 = $v + 1;
+               
+               while (($vals[$v2][type] != 'close') && ($vals[$v2]['attributes']['CODE'] != $mycode))
+                  { 
+                      $v2++; 
+
+                  }
+               if ($vals[$v2]['attributes']['CODE'] == $mycode) 
+                  {
+                     $valor = $vals[$v2]['value'];
+                     return $valor;
+                  }
+             }
+          }
+      }
+   return '';
+   }
+
+function getvaluebytag2($index, $vals, $mytag, $tagtype)
+  {
+  $indexfield = $index[$tagtype];
+  //print_r($indexfield);
+  $tipo =  gettype($indexfield);
+  //print_r($index);
+  if ($tipo != 'array')  //situacion anomala
+      {  //print_r($index); 
+            //print_r($vals);
+      
+         return "no";
+      }
+  foreach ($indexfield as $k=>$v)
+     {  //print "checando ".$v." ".$vals[$v]['attributes']['TAG']." contra ".$mytag."<br>";
+        if ($vals[$v]['attributes']['TAG'] == $mytag)
+          {
+            $valor = $vals[$v]['value'];
+            return $valor;
+
+           }
+     }
+  return 'no';
+}
+
+function getvaluebyCode($index, $vals, $mytag, $tagtype)
+  {
+  $indexfield = $index[$tagtype];
+  //print_r($indexfield);
+  $tipo =  gettype($indexfield);
+  //print_r($index);
+  if ($tipo != 'array')  //situacion anomala
+      {  //print_r($index); 
+            //print_r($vals);
+      
+         return "no";
+      }
+  foreach ($indexfield as $k=>$v)
+     {  //print "checando ".$v." ".$vals[$v]['attributes']['TAG']." contra ".$mytag."<br>";
+        if ($vals[$v]['attributes']['CODE'] == $mytag)
+          {
+            $valor = $vals[$v]['value'];
+            //if(is_numeric($valor)){
+            	return substr($valor,0,4);
+            	//}
+
+           }
+     }
+  return 'no';
+}
+
+function xmltoarray($rec)
+  {
+    $parser = xml_parser_create();
+    xml_parse_into_struct($parser, $rec, $vals, $index);
+    xml_parser_free($parser);
+    return array('index' => $index, 'vals' => $vals);
+  }
+function comillas($st)
+  {
+  return '"'.$st.'"';
+  }
+
+function ccbp_buscar($campo, $query, $localidad, $num_hosts, $host, $start, $qautor, $qtitulo, $qtema, $bib_id, $bp_nombre, $isbn, $debug)
+{   $s = '';
+    $prefijo='';
+if (False)
+  {
+//print "Parametros:";
+//print "campo=".$campo." query:".$query." ";
+//print " Localidad=";
+//print_r($localidad);
+//print " numhosts=".$num_hosts." host="; print_r($host);
+  }
+  print '<script type="text/javascript" src="http://books.google.com/books/previewlib.js"></script>';
+    
+    $query = trim($query);
+    $qtitulo = trim($qtitulo);
+    $bp_nombre = trim($bp_nombre);
+    switch($campo) {
+        case "2": $prefijo=" @attr 1=1003 @attr 4=1 ";
+                  break;
+        case "3": $prefijo=" @attr 1=4 ";
+                  break;
+                   }
+    if ($query)
+    	$finalquery = $prefijo.comillas($query);
+
+    if ($qtitulo){
+      $myquery = "  @attr 1=4  ".comillas($qtitulo);
+        if ($finalquery) {$finalquery = "@and ".$finalquery." ".$myquery;}
+         else{$finalquery = $myquery;}
+      }
+
+    if ($qautor)
+       {$myquery = "  @attr 1=1003 @attr 4=1 ".comillas($qautor);
+        if ($finalquery) $finalquery = "@and ".$finalquery." ".$myquery;
+            else
+                         $finalquery = $myquery;
+      }
+    if ($qtema)
+       {$myquery = "  @attr 1=21  ".comillas($qtema);
+        if ($finalquery) $finalquery = "@and ".$finalquery." ".$myquery;
+            else
+                         $finalquery = $myquery;
+      }
+    if ($isbn)
+       {$myquery = "  @or @attr 1=7  ".comillas($isbn)." @attr 1=8  ".comillas($isbn);
+        if ($finalquery) $finalquery = "@and ".$finalquery." ".$myquery;
+            else
+                         $finalquery = $myquery;
+      }
+    if ($bib_id)
+       {//$myquery = "  @attr 1=56 ".comillas($bib_id);
+       $myquery = "  @attr 1=homebranch ".comillas($bib_id);
+        if ($finalquery) $finalquery = "@and ".$finalquery." ".$myquery;
+            else
+                         $finalquery = $myquery;
+      }
+    $error_condicion_loc = '';
+    $bp_nombre = str_replace( "'", "", $bp_nombre);
+    
+    if (($localidad) || ($bp_nombre)) {
+         $resultado_condicion_loc=condicion_bib($localidad, $bp_nombre);
+         $condicion_loc = $resultado_condicion_loc[0];
+         $error_condicion_loc = $resultado_condicion_loc[1];
+         $finalquery = "@and ".$condicion_loc." ".$finalquery;
+         
+         if($_GET['debug'] || $_GET['xx']){
+         	print "<h1>Final Query</h1>".$finalquery;
+         }
+        }
+    
+    if ($debug || $_GET['xx']) {
+    	echo '<h1>Search</h1>You searched for ' . htmlspecialchars($finalquery) . '<br />';
+    	echo '<h1>NumHost</h1>' . $num_hosts . '<br />';
+    }
+
+
+    for ($i = 0; $i < $num_hosts; $i++) {
+        $id[] = yaz_connect($host[$i]);
+        yaz_syntax($id[$i], "usmarc");
+        //yaz_range($id[$i], 1, 10);
+        yaz_sort($id[$i], "1=1003 ia 1=4 ia");
+        yaz_search($id[$i], "rpn", $finalquery);
+       
+        
+    }
+    yaz_wait();
+    
+    for ($i = 0; $i < $num_hosts; $i++) {
+        //$s .= "debug ".$debug;
+        $error = yaz_error($id[$i]);
+        $hits=0;
+        if (!empty($error)) {
+            echo "Error: $error";
+        } else {
+            $hits = yaz_hits($id[$i]);
+            //echo "Result Count $hits";
+        }
+        $table_results=array();
+        $table_results['data']=array();
+        $p =$start;
+        $max_records = 100;
+        $end = $p + $max_records;
+       
+        
+        if($_GET['xx']){
+           print '<h1>HITS</h1><pre>';print_r($hits);print '</pre>';
+          
+        }
+ 
+        
+        
+        if ($hits)
+        {
+          
+        $rec = yaz_record($id[$i], $p, "xml");
+        //print_r($rec);
+        $res = xmltoarray($rec);
+        $index = $res['index'];
+        $vals  = $res['vals'];
+        $nrec = getvaluebytag($index, $vals, '999','c');
+        if ($debug || $_GET['xx'])
+               {
+               print "<code>".$rec."</code>";
+               print '<h1>INDEX</h1><pre>';print_r($index);print '</pre>';
+               print '<h1>VALS</h1><pre>';print_r($vals);print '</pre>';
+               }
+
+        $autor_actual=getvaluebytag($index, $vals, '100','a');
+        $autor = $autor_actual;
+        $autor_c = clean_str($autor_actual);
+        $autor_actual_c = clean_str($autor_actual);
+        $titulo_actual=getvaluebytag($index, $vals, '245','a');
+        $titulo = $titulo_actual;
+        $titulo_actual_c = clean_str($titulo_actual);
+        $titulo_c = $titulo_actual_c;
+        $nrec_actual = getvaluebytag($index, $vals, '999','c');
+
+        //$bib = getvaluebytag2($index, $vals, '003','CONTROLFIELD');
+        //$bib = getvaluebytag($index, $vals, '040','a');
+        $bib = getvaluebytag($index, $vals, '952','a');
+        //Arreglo by Diego
+        /*if(!is_numeric($bib)){
+        	//$bib=3707;
+        	$bib=getvaluebyCode($index, $vals, 'p','SUBFIELD');
+        }*/
+        
+       
+        if (! $bib) {$bib = getvaluebytag($index, $vals, '952','b');}
+       
+        $nombrebp = nombrebp($bib);
+        $nbib=0;
+        $bibs = array();
+        while (($p <= $end) && ($rec) ) {
+            while (($autor_c == $autor_actual_c) && ($titulo_c == $titulo_actual_c) && ($rec) && ($p <= $end))
+               {
+                if (isset($bibs[$bib])){$bibs[$bib]++;}
+								else{$bibs[$bib]=1;}
+                //$bibs[$nbib]=$bib;
+                //$nbib++; 
+            	$p++;
+            	$rec = yaz_record($id[$i], $p, "xml");
+
+            	$res = xmltoarray($rec);
+            	$index = $res['index'];
+            	$vals  = $res['vals'];
+                if ($rec)
+                   {
+            		$autor= getvaluebytag($index, $vals, '100','a');
+                        $autor_c = clean_str($autor);
+            		$titulo= getvaluebytag($index, $vals, '245','a');
+                        $titulo_c = clean_str($titulo);
+            		$ed = getvaluebytag($index, $vals, '250','a');
+        				//$bib = getvaluebytag($index, $vals, '040','a');
+        		$bib = getvaluebytag($index, $vals, '952','a');
+        		 //Arreglo by diego;
+        		 /*if(!is_numeric($bib)){
+        	
+        				$bib=getvaluebyCode($index, $vals, 'p','SUBFIELD');
+        			}*/
+        		if (! $bib) {$bib = getvaluebytag($index, $vals, '952','b');}
+        		 
+        		
+            		//$bib = getvaluebytag2($index, $vals, '003','CONTROLFIELD');
+                        $nrec = getvaluebytag($index, $vals, '999','c');
+            		$nombrebp = nombrebp($bib  );
+			$editorial = getvaluebytag($index, $vals, '260', 'b');
+			$anio = getvaluebytag($index, $vals, '260', 'c');
+			$lugar = getvaluebytag($index, $vals, '260', 'a');
+			$isbn = getvaluebytag($index, $vals, '20', 'a');
+      if(getvaluebytag($index, $vals, '20', 'a')==""){
+        $isbn="";
+      }
+      //print '***********'.$titulo.':'.$isbn.'***********';
+			$soporte = getvaluebytag($index, $vals, '942', 'c');
+                        if (! $soporte) $soporte = getvaluebytag($index, $vals, '952', 'y');
+
+                   }
+
+               } // while autor.....
+            $sbibs = "";
+            $id_bibs = '';
+	    
+	     if ($debug){
+         	 print '<h1>BIBS</h1><pre>';print_r($bibs);print '</pre>';
+         }    
+	    foreach ($bibs as $k => $v)
+		{
+                $sbibs .= '<div class="subitem">'.$k.'-'.nombrebp($k)."($v) </div> "; 
+                        }
+        
+               
+                        
+           // $liga_titulo_actual = "<a href=/cons_ccbp_item?bib_id=".$nrec_actual."&bibs=$id_bibs>".$titulo_actual."</a>";  
+            //$table_results[]=array($titulo_actual, $autor_actual, $sbibs);
+            $renglon = "<h4>$titulo</h4>";
+            if ($autor_actual)
+               {
+            	$renglon .= "<h4> por ";
+            	$renglon .= "$autor_actual</h4>";
+               }
+            if ($isbn) {
+              
+                $infoJson = file_get_contents('https://www.googleapis.com/books/v1/volumes?q=isbn:'.str_replace('-','',$isbn));
+                $infoBook=json_decode($infoJson);
+                $gbook=$infoBook->items[0];
+                if($gbook->volumeInfo->imageLinks->thumbnail !=""){$gbookImage='<img src="'.$gbook->volumeInfo->imageLinks->thumbnail.'"/>';}  
+                else {$gbookImage="";}
+
+                //MODIF
+$renglon.= '
+<div class="gpreview">'.$gbookImage.'
+<script type="text/javascript">
+GBS_setLanguage(\'es\');
+GBS_insertPreviewButtonPopup(\'ISBN:'.str_replace('-','',$isbn).'\');
+</script><br/></div><div class="item"><label>ISBN</label>'.str_replace('-','',$isbn).'</div>
+';
+
+              } 
+
+            if ($issn) {$renglon .= '<div class="item">
+         
+
+              <label>ISSN</label>'.$issn.'</div>';} 
+            if ($soporte) $renglon .= '<div class="item"><label>Soporte</label>'.$soporte.'</div>';
+            $renglon .= '<div class="item"><label>Publicacion</label>'.$lugar.' '.$editorial.' '.$anio.'</div>';
+            $renglon .= '<div class="item"><label>Disponibilidad:</label>'.$sbibs.'</div>';
+            //$table_results[]=array($titulo_actual, $autor_actual, $sbibs);
+            $table_results[]=array($renglon);
+            $titulo_actual = $titulo;
+            $titulo_actual_c = clean_str($titulo);
+            //$titulo_c = $titulo_actual;
+            $autor_actual =  $autor;
+            $autor_actual_c =  clean_str($autor);
+            $nrec_actual = getvaluebytag($index, $vals, '999','c');
+            //$autor_c =  clean_str($autor);
+
+            $bibs = array();
+            $nbib = 0;
+            //$p++;
+            } //while (($p <= $end) && $rec)
+    }
+
+
+} //if $hits
+//return $s;
+
+
+return array($table_results, $hits, $error_condicion_loc);
+}
+
+
+
+
+function cons_ccbp_all() {
+return drupal_get_form('forma_consulta');
+
+}
+
+function cons_ccbp_item() {
+return drupal_get_form('forma_item');
+
+}
+
+function forma_consulta_validate($form, &$form_state) {
+  if ( ($form_state['values']['query'] == '') && ($form_state['values']['autor'] == '')  && ($form_state['values']['titulo'] == '')  && ($form_state['values']['tema'] == '') && ($form_state['values']['bib_id'] == '') && ($form_state['values']['isbn'] == '')) {
+    form_set_error('', t('La consulta debe tener al menos autor o t&iacute;tulo.'));
+  }
+}
+
+
+function cons_ccbp_menu() {
+
+  $items = array();
+  $items['cons_ccbp'] = array(
+    'title' => 'consulta catalogo colectivo',
+    'page callback' => 'cons_ccbp_all',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+  
+    $items['cons_ccbp2'] = array(
+    'title' => 'consulta catalogo colectivo',
+    'page callback' => 'cons_ccbp_all',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+  
+  $items['cons_ccbp_item'] = array(
+    'title' => 'item catalogo colectivo',
+    'page callback' => 'cons_ccbp_item',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+return $items;
+}
+
+function selectlocalidad()
+  { $r = taxonomy_get_tree(5);
+    $f = '';
+    $f .=  '<SELECT NAME="localidad">';
+    $f .= '<OPTION VALUE="">Todas';
+       
+    foreach ($r as $k=>$v)
+      {  $pref='';
+         if ($v->depth) $pref="--";
+         $f .= '<OPTION VALUE="'.$v->tid.'">'.$pref.$v->name;
+
+
+      }
+    $f .= '</select>';
+  return $f;
+  
+
+  }
+

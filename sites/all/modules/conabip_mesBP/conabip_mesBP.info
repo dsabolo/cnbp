@@ -1,0 +1,5 @@
+name = CONABIP Mes de las BP's
+description =  Mes de las BP's
+core = 6.x
+package = "Conabip"
+version = 6.02

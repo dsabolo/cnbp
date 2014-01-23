@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>Acceso Denegado</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="description" content="Seccion restringida" />
+		<style>
+			* {
+				font-family:arial;
+			}
+			body {
+					background: #0080bb;
+					text-align:center;
+			}
+			#wrapper {
+				background:#fff;
+				width:600px;
+				margin:auto;
+				text-align:left;
+				padding-bottom:100px;
+				padding:20px;
+				margin-top:100px;
+			}
+			h1 {
+				color:#000;
+				font-weight:normal;
+				font-size:22px;
+			}
+			a {
+				color:#0080bb;
+			}
+			#logo {
+				text-align:center;
+				border-bottom:4px solid #ccc;
+				margin-bottom:40px;
+				padding-bottom:20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="wrapper">
+			<div id="logo"><img src="<?=base_path();?>sites/all/themes/fusion_conabip/logo2011.png"></div>
+					<h1>Usted no tiene acceso para acceder a esta área del portal. </h1>
+		<p>Intente ingresando a su cuenta de usuario haciendo <?=l('click aquí', 'user')?>.</p>
+
+		</div>
+
+	</body>
+</html>

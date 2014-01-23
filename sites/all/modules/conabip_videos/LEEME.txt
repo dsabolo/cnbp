@@ -1,0 +1,33 @@
+1) Ocultar con el gestor de bloques todos los bloques de la derecha para el url canal_bp
+2) Habikitar el modulio
+3) Crear el listado de categorias
+Amigos de las BP´s 	 
+ 
+Bibliomóviles 	 
+ 
+BP´s Argentinas 	 
+ 
+Capacitaciones 	 
+ 
+Institucional 	 
+ 
+Libro % y Encuentros 	 
+ 
+Spots
+
+
+4) Asignar categorias a cada video
+
+5) Crear el CT banner video
+-title
+-body
+-imagen para el video (ya existe)
+-video_link (node reference a video / autocomplete)
+
+6) Crear contenidos de banners videos
+
+7) Migrar estilos override.csss
+
+8) hacer un header 301 de video a canal_bp
+
+

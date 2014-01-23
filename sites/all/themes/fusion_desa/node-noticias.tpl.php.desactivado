@@ -1,0 +1,7 @@
+<?php
+$view_args = array( $node->nid );
+$id = (string) $node->nid;
+header('HTTP/1.1 301 Moved Permanently');
+header('Location: /noticias/noticia/'.$id);
+exit();
+?>

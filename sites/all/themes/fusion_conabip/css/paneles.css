@@ -1,0 +1,79 @@
+
+/*-----------------paneles generales de 3 cols-----------*/
+
+ .panel-3col-33 .panel-col .inside, 
+ .panel-3col-33 .panel-col-first .inside , 
+ .panel-3col-33 .panel-col-last .inside  { margin:0; padding:10px 20px; } /*interior de cada panel */
+
+ .panel-3col-33 { width:752px; margin-left:10px; float:left; } /* contenedor general de paneles */
+
+ .panel-3col-33 .panel-col-first, 
+ .panel-3col-33 .panel-col , 
+ .panel-3col-33 .panel-col-last { width:250px; height:235px; float:left; background:transparent url(images/panel-sombra-bg.png) no-repeat top left; } /* cada panel */
+
+ .panel-3col-33 span.field-content a {color:#0080BB; font-size:16px; font-weight:800; margin:20px 0px 0px 0px; display:block; text-transform:uppercase; height: 57px;} /* titulo de cada panel */
+ .panel-3col-33 div.field-content div.field-item { margin: 10px 10px 10px 5px; padding-left: 15px; background:transparent url(images/circulo.png) no-repeat left 5px ;  }/* parrafo de texto */
+ .panel-3col-33 div.field-content div.field-item a { color:#000000; line-height:15px; font-size:11px;  }
+ .panel-3col-33 div.field-content div.field-item a:hover { text-decoration:none; color:#0080BB; }
+
+ .panel-3col-33 span.field-content a.icono-institucional { background:transparent url(images/icono-panel-institucional.png) no-repeat right 0px; }/* icono de cada panel */
+
+/*-----------------paneles con sombra ------------------*/
+.panels-flexible-region-27-button { width:100%; }
+.panels-flexible-region-27-button .panel-3col-33 .panel-col .inside, 
+.panels-flexible-region-27-button .panel-3col-33 .panel-col-first .inside , 
+.panels-flexible-region-27-button .panel-3col-33 .panel-col-last .inside  { margin:0; padding:10px 20px; } /*interior de cada panel */
+
+.panels-flexible-region-27-button .panel-3col-33 { width:752px; margin-left:10px; float:left; } /* contenedor general de paneles */
+
+.panels-flexible-region-27-button .panel-3col-33 .panel-col-first, 
+.panels-flexible-region-27-button .panel-3col-33 .panel-col , 
+.panels-flexible-region-27-button .panel-3col-33 .panel-col-last { width:250px; height:235px; float:left; background:transparent url(images/panel-sombra-bg.png) no-repeat top left; } /* cada panel */
+
+.panels-flexible-region-27-button .panel-3col-33 span.field-content a {color:#0080BB; font-size:16px; font-weight:800; margin:20px 0px 0px 0px; display:block; text-transform:uppercase; height: 57px;} /* titulo de cada panel */
+.panels-flexible-region-27-button .panel-3col-33 div.field-content div.field-item { margin: 10px 10px 10px 5px; padding-left: 15px; background:transparent url(images/circulo.png) no-repeat left 5px ;  }/* parrafo de texto */
+.panels-flexible-region-27-button .panel-3col-33 div.field-content div.field-item a { color:#000000; line-height:15px; font-size:11px;  }
+.panels-flexible-region-27-button .panel-3col-33 div.field-content div.field-item a:hover { text-decoration:none; color:#0080BB; }
+
+.panels-flexible-region-27-button .panel-3col-33 span.field-content a.icono-institucional { background:transparent url(images/icono-panel-institucional.png) no-repeat right 0px; }/* icono de cada panel */
+
+/*-----------------paneles 3 columnas ------------------*/
+
+.panels-flexible-row-27-2 { width:100%; padding:0 10px 0 15px; margin-top:30px; background: red !important;}
+
+.panels-flexible-row-27-2 h2.block-title { font-size:16px; color:#000; border-left:3px solid #0080BB; font-weight:800; padding:0 0 5px 10px; background:transparent url(images/h2-bg.png) repeat-x bottom left; margin-bottom:30px; }/*titulo de seccion */
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel  { width:247px; margin-bottom:30px; position:relative; }/*cada columna*/
+
+.panels-flexible-row-27-2 .panel-3col-33 .panel-col-first,
+.panels-flexible-row-27-2 .panel-3col-33 .panel-col,
+.panels-flexible-row-27-2 .panel-3col-33 .panel-col-last{ width:237px; float:left; margin-right:10px;   padding-bottom: 10px; border-bottom: 4px solid #E6E6E6;  }
+ 
+.panels-row-27-2 .panel-3col-33 .panel-col-last { margin-right:0; }/*ultima columna*/
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .inner { zoom:0; }/*para IE 7*/
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-field-imagen-fid { text-align:center; background-color:#E6E6E6; padding: 10px 0px; height:100px; display:block; clear:both; width:auto; position:relative; }/*Fondo de imagenes*/
+
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-field-cintillo-value { color:#0080BB; float:left; font-size:10px; text-transform:uppercase; }/*cintillo*/
+
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-field-fecha-publicaciones-value {color:#4D4D4D; float:right; font-size:10px; }/*fecha*/
+
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-title a {color:#4d4d4d; font-size:15px; font-weight:800; text-align:left; margin:10px 0 5px 0; line-height:120%; display:block; height:60px; overflow:hidden; } /*titulo nota*/
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-title a:hover { color:#0080bb; text-decoration:none; }
+
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-field-copete-value { text-align:left; font-size:11px; height:95px; overflow:hidden; } /*texto nota*/
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid { margin:10px 0px; }/*div de ver + / iconos */
+
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a.ver { display:block; float:left; width: 100px; color:#000; font-size:10px; text-transform:uppercase;  }
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a.ver:hover { display:block; float:left; width: 100px; color:#0080BB;  }
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a.foto,
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a.audio,
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a..home_link_documento
+{ float:right; width:20px; height:20px; background-color:transparent; text-indent:-9999px; display:block; margin:0 3px;}
+
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a.foto { background:url(images/iconos-panel-sinsombra.png) no-repeat top left; }
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a.audio { background:url(images/iconos-panel-sinsombra.png) no-repeat top center; }
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a..home_link_documento{ background:url(images/iconos-panel-sinsombra.png) no-repeat top right; }
+
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a:hover.foto { background:url(images/iconos-panel-sinsombra.png) no-repeat bottom left; }
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a:hover.audio { background:url(images/iconos-panel-sinsombra.png) no-repeat bottom center; }
+.panels-flexible-row-27-2 .panel-3col-33 .panel-panel .views-field-nid span.field-content a:hover.documento{ background:url(images/iconos-panel-sinsombra.png) no-repeat bottom right; }
+

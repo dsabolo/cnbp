@@ -1,0 +1,4 @@
+; $Id$
+name = cons_ccbp
+description = Busqueda en catalogo colectivo
+core = 6.x

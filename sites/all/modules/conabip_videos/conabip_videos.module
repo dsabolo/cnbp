@@ -1,0 +1,169 @@
+<?php 
+
+/*PERMS*/
+function conabip_videos_perm() {
+  return array('ver videos');
+} 
+
+/*MENU*/
+function conabip_videos_menu() {
+
+  $items = array();
+
+
+  $items['canal_bp'] = array(
+    'title' => 'Canal BP',
+    'description' => '',
+    'page callback' => 'conabip_videos_all',   
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('ver videos'),
+   );
+
+ 
+
+  return $items;
+}
+
+
+
+
+
+/*PAGINA VIDEOS*/
+function conabip_videos_all(){
+	drupal_add_css('sites/all/modules/conabip_videos/conabip_videos.css');
+	drupal_add_js('sites/all/modules/conabip_videos/conabip_videos.js');
+	
+	
+	//$preprodHack='http://www.conabip.gob.ar/';
+	
+	if($_GET['video']){
+		$videoActual=node_load($_GET['video']);
+//		print_r($videoActual);
+		$salida='<div id="overlay">
+		<img src="'.base_path().'sites/all/modules/conabip_videos/overlay.png">
+		<div id="videoWrapper">
+		'.node_view($videoActual).'
+
+		</div>
+		
+		<div id="videoActions">
+			<div class="videoActions">
+			<h2>'.$videoActual->title.'</h2>
+			<a id="videoClose" href="'.base_path().'canal_bp?tid='.$_GET['tid'].'">CERRAR</a>
+			
+			<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/es_ES/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, \'script\', \'facebook-jssdk\'));</script>
+<div class="fb-like" data-send="true" data-width="450" data-show-faces="true" data-colorscheme="dark"></div>
+			'.$videoActual->field_copete[0]['value'].'
+			</div>
+		</div>
+		
+		</div>';
+	}
+	
+	
+	if($_GET['tid']){
+		$salida.='<script>
+			$(document).ready(
+				function(){
+					$("#destacado").removeClass("current");
+			$("#term'.$_GET['tid'].'").addClass("current");
+			$(".destacado").slideUp();
+			$(".term'.$_GET['tid'].'").slideDown();	
+				}
+			);
+			
+			
+		</script>';
+	}
+	
+	$filtro_tipos_video=taxonomy_get_tree(17);
+	$menuFiltro[]='<a href="#" id="destacado"  class="filter middle-button">Destacados</a>';
+	
+	
+	foreach($filtro_tipos_video as $key){
+	
+		$filter='filter';	
+		$menuFiltro[]='<a href="#" id="term'.$key->tid.'"  class="'.$filter.' middle-button">'.$key->name.'</a>';
+	}
+		$salida.= conabip_videos_banners();
+	$salida.= theme('item_list',$menuFiltro, null, 'ul', array('id'=>'filter'));
+
+	
+	
+	$videos = db_query('SELECT nid FROM node WHERE type="video" AND status=1 ORDER BY created DESC');
+	if(db_affected_rows()>0){
+		while($result = db_fetch_array($videos)){
+				$video = node_load($result['nid'], null, true);
+				if($video->field_destacada[0]['value']==1){$destacada='destacado'; } else {$destacada='';}
+				//print_r($video);
+				$tid=array_keys(taxonomy_node_get_terms_by_vocabulary($video, 17, $key = 'tid'));
+				$salida.='<div class="canalBP_video term'.$tid[0].' '.$destacada.'"><div class="videoBPwrapper"><div class="similPlayer"></div><img src="'.$preprodHack.base_path().$video->field_video[0]['data']['video_thumb'].'" alt="thumb"></div><a href="'.base_path().'canal_bp?video='.$video->nid.'&tid='.$tid[0].'">'.$video->title.'</a></div>';
+		}
+	return $salida;
+	}	
+	return "no results";
+}
+
+
+
+function conabip_videos_banners(){
+		
+      		if(db_affected_rows()){
+    
+    	$salida = ' <div class="bannernav"><a href="#" id="bannerprev2">Anterior</a> <a href="#" id="bannernext2">Siguiente</a></div><table id="homev2Header">
+      	<tr>
+      		<td id="homev2_bannerHome">';
+
+  	$banners=db_query('SELECT nid FROM node WHERE type="bannervideo" AND status=1');
+
+  
+      			while($result=db_fetch_array($banners)){
+      			
+      			
+      				$banner=node_load($result['nid']);
+      				
+      				//print_r($banner); die();
+      				//$bannerImage=node_load($banner->iids[0]);
+//print_r($bannerImage->images['_original']);
+      				$salida.='<div class="slide"><a href="'.base_path().'canal_bp?video='.$banner->field_video_id[0]['nid'].'"><div class="bannerTXT"><div><h2>'.$banner->title.'</h2><p>'.$banner->teaser.'</p></div></div>'.theme('imagecache','bannerFull',$banner->field_imagen[0]['filepath']).'</a></div>';
+      			}
+      		
+      		$salida.= "</td></tr></table><div class=\"clear\"></div>";
+      		$salida.= " <script>
+      	$(document).ready(
+      		function(){
+      			$('#homev2_bannerHome').cycle(
+      			{
+      				  fx:     'fade', 
+    speed:  'slow', 
+    timeout: 5000, 
+    next:   '#bannernext2', 
+    prev:   '#bannerprev2' 
+      			}
+      			);
+      		}
+      	);
+      </script>";
+      		
+      		
+      		      		}
+      		      		
+      		      	//	print $salida; die();
+	
+	return($salida);
+}
+
+
+
+
+   
+
+?>
+

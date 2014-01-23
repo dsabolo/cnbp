@@ -1,0 +1,124 @@
+	#pid-canal-bp #content-content, #content-inner ,#content-region-inner, #content-region, #content-group-inner , #content-group, #main-content-inner, #main-content, #main-group { 
+				width:992px !important;
+			
+			}
+			
+			
+.canalBP_video {
+	border:1px solid #fff;
+	width:220px; 
+	float:left;
+	height:240px;
+	display: block;
+	margin:12px;
+}
+
+.videoBPwrapper {
+	height:130px;
+	overflow: hidden;
+	background: #000;
+}
+
+.videoBPwrapper img {
+	width:260px;
+	height:auto;
+}
+.canalBP_video a {
+	padding:10px !important;
+	padding-left:0 !important;
+	display: block !important;
+	border-top:1px solid #000;
+	color:#555 !important;
+}
+.canalBP_video a:hover {
+	color:#222 !important;
+}
+#overlay {
+	display: block;
+	position: fixed;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+	z-index:999999;
+}
+#overlay img {
+	width:100%;
+	height:100%;
+}
+#overlay a, #overlay h2.title {
+	color:rgb (0,128,187); border:0 !important;
+}
+#videoWrapper {
+	width:729px;
+	height:auto;
+	position: fixed;
+	top:0;
+	left:50%;
+	margin-left:-365px;
+	margin-top:100px;
+	background: #000;
+	z-index:99999;
+}
+#videoActions  {
+	width:730px;
+	
+	position: fixed;
+	top:50%;
+	left:50%;
+	margin-left:-365px;
+	margin-top:105px;
+	background: #000;
+	z-index:99999;
+}
+.videoActions {
+	padding:10px;
+}
+#videoClose {
+	float:right;
+}
+.videoClose h2 {
+	color:#fff;
+	border:0px !important;
+}
+
+#videoWrapper h2 {display: none;}
+
+#filter {
+	height:30px;
+	text-align: center;
+	list-style: none;
+}
+#filter li {
+	display: inline-table;
+	list-style: none;
+	margin:3px;	
+}
+#filter li a {
+	text-transform: uppercase;
+	border:1px solid #ddd;
+	padding:3px;
+	font-size: 11px;
+}
+#filter li a:hover , #filter li a.current {
+	background: #000;
+	color:#fff;
+	text-decoration: none;
+}
+
+.canalBP_video .similPlayer {
+	display: block;
+	width:70px;
+	height:70px;
+	position: absolute;
+	margin-left:80px !important;
+	margin-top: 35px !important;
+	background: none !important;
+}
+
+
+
+
+
+
+#sidebar-first {display: none !important}

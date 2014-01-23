@@ -1,0 +1,82 @@
+La radio es un nodo con el siguiente contenido
+
+<div id="radioWrapper">
+	<p class="intro">
+		Radio BeP&eacute; es un lugar de convergencia de la diversidad de las bibliotecas populares y de la difusi&oacute;n de los servicios y actividades que ofrecen. Transmite en vivo todos los martes y jueves a las 16 horas. Los mi&eacute;rcoles y los viernes a las 11 hs pod&eacute;s escuchar la repetici&oacute;n.
+<br>Si durante el horario de la radio en tu computadora no funcona el reproductor online, puedes escucharnos con tu reproductor favorito (Windows Media Player, VLC, QuickTime, ETC) haciendo <a href="http://radio.bepe.ar:8000/media.m3u" target="_blank">click aquí</a>.
+	</p>
+	<div id="radioPlayer">
+<?php
+error_reporting(E_ERROR);
+$fp = fsockopen("10.0.0.101", 8000, $errno, $errstr, 30);
+if ($fp == false) {
+    echo "$errstr ($errno)";
+} else {
+        fputs($fp, "GET / HTTP/1.1\r\n");
+        fputs($fp, "Host: radio.bepe.ar\r\n");
+        fputs($fp, "Connection: Close\r\n\r\n");
+
+    while (!feof($fp)) {
+       $cadena .= fgets($fp, 1024);
+   }
+    fclose($fp);
+    $pos = strpos($cadena, "media.m3u");
+        if ($pos == FALSE) {
+               echo "<img src=\"sites/default/files/fuera_linea.jpg\" alt=\"Radio Bepe no transmite\"/>";
+        }
+        else {
+		echo "<span class=\"bp_titulo\">Radio Bep&eacute;</span><br>";
+		echo "<span class=\"bp_subtitulo\">Transmitiendo programa en vivo</span><br>";
+		echo "<span class=\"bp_reproductor\"><object bgcolor=\"#FFFFFF\" height=\"62\" width=\"190\"> <param name=\"movie\" value=\"ffmp3-config.swf\" /> <param name=\"flashvars\" value=\"url=http://radio.bepe.ar:8000/media&amp;lang=sp&amp;codec=mp3&amp;volume=100&amp;traking=true&amp;jsevents=true&amp;buffering=5&amp;skin=ffmp3-darkconsole.xml&amp;title=Radio%20Bepé&amp;welcome=Radio%20Bepé\" /> <param name=\"wmode\" value=\"window\" /> <param name=\"allowscriptaccess\" value=\"always\" /> <param name=\"scale\" value=\"noscale\" /> <embed allowscriptaccess=\"always\" bgcolor=\"#FFFFFF\" flashvars=\"url=http://radio.bepe.ar:8000/media&amp;lang=sp&amp;codec=mp3&amp;volume=100&amp;traking=true&amp;jsevents=true&amp;buffering=5&amp;skin=ffmp3-darkconsole.xml&amp;title=Radio%20Bepé&amp;welcome=Radio%20Bepé\" height=\"62\" scale=\"noscale\" src=\"ffmp3-config.swf\" type=\"application/x-shockwave-flash\" width=\"190\" wmode=\"window\"></embed></object></span>";
+
+        }
+	
+    echo "<br>";
+}
+?>	</div>
+	<div class="clear">
+		&nbsp;
+	</div>
+	<div class="panel1_3 panel1_3_1">
+		<h2>
+			Programas Anteriores
+		</h2>
+		<p>
+			Archivo de las emisiones de RADIO BEPE
+		</p>
+		<p>
+<?=l('Escuchá el último programa','taxonomy/term/2893');?>		</p>
+		<p class="viewmore">
+<?=l('Ver+','taxonomy/term/2893');?>		</p>
+	</div>
+	<div class="panel1_3 panel1_3_2">
+		<h2>
+			Entrevistas
+		</h2>
+		<p>
+			Las Bibliotecas Populares nos cuentan sus experiencias. <?=l('Accede al listado','taxonomy/term/2896');?><br />
+			.
+		</p>
+		<p>
+			Entrevistas a Personas de la cultura. Amigos de las bep&eacute;, escritores, m&uacute;sicos. <?=l('Accede al listado','taxonomy/term/2897');?>
+		</p>
+		<p class="viewmore">
+<?=l('Ver+','taxonomy/term/2894');?>		</p>
+	</div>
+	<div class="panel1_3 panel1_3_3 last">
+		<h2>
+			Radioteca
+		</h2>
+		<p>
+			Material de audio para bajar y usar en tu programa de radio. <?=l('Accede al listado','taxonomy/term/2899');?>
+		</p>
+		<p>
+			La Colectiva, Spots institucionales, y mucho m&aacute;s <?=l('Accede al listado','taxonomy/term/2898');?>
+		</p>
+		<p class="viewmore">
+<?=l('Ver+','taxonomy/term/2895');?>		</p>
+	</div>
+	<div class="clear">
+		&nbsp;
+	</div>
+</div>

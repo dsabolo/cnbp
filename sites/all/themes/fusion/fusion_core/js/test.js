@@ -1,0 +1,13 @@
+(function($){
+$(document).ready(function(){
+       $('#edit-field-list-rent-1yr-amount-min-wrapper').parents('div.views-exposed-widget:first').hide();
+       $('#edit-field-sell-rent-value-many-to-one-Rent').click(function(){
+       $('#edit-field-list-rent-1yr-amount-min-wrapper').parents('div.views-exposed-widget:first').show();
+       $('#edit-field-sales-price-amount-min-wrapper').parents('div.views-exposed-widget:first').hide();
+});
+       $('#edit-field-sell-rent-value-many-to-one-Buy').click(function(){
+       $('#edit-field-list-rent-1yr-amount-min-wrapper').parents('div.views-exposed-widget:first').hide();
+       $('#edit-field-sales-price-amount-min-wrapper').parents('div.views-exposed-widget:first').show();
+    });
+  });
+})(jQuery);
